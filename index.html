@@ -34,6 +34,8 @@ path {
 	g = d.getElementsByTagName('body')[0],
     x = w.innerWidth || e.clientWidth || g.clientWidth,
     y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+    x0=810;
+    y0=225;
     
     console.log(x+"=="+y);
 	var width = 1158,
@@ -49,12 +51,12 @@ path {
 	  return {
 	    vx: Math.random() * 2 - 1,
 	    vy: Math.random() * 2 - 1,
-	    path: d3.range(m).map(function() { return [x, y]; }),
+	    path: d3.range(m).map(function() { return [x0, y0]; }),
 	    count: 0
 	  };
 	});
 	
-	//console.log(spermatozoa);
+	console.log(spermatozoa);
 	var centX=(width-1168)/2;
 	
 	var svg = d3.select("body").append("svg")
@@ -76,7 +78,7 @@ path {
 	
     
 	
-	var head = g.append("ellipse")
+	head = g.append("ellipse")
 	    .attr("rx", 6.5)
 	    .attr("ry", 4);
 	
@@ -88,29 +90,63 @@ path {
 	    .datum(function(d) { return d.path; })
 	    .attr("class", "tail");
 	
-	var z=g.append("svg:image")
-	   .attr('x', 910)
-	   .attr('y', 225)
+	z=g.append("svg:image")
 	   .attr('width', 250)
 	   .attr('height', 354)
 	   .attr("xlink:href","zombie.svg")
 	   .attr("class","zombie");
 	   
-	var tail = g.selectAll("path");
-	function createZombie() {
-		g.append("svg:image")
-	   .attr('x', 910)
-	   .attr('y', 225)
-	   .attr('width', 250)
-	   .attr('height', 354)
-	   .attr("xlink:href","zombie.svg")
-	   .attr("class","zombie");
-	};
+	tail = g.selectAll("path");
 	
-	//setInterval(createZombie, 1000);
+	function createZombie() {
+		 var x = Math.random() * width,
+	     y = Math.random() * height;
+		 if (spermatozoa.length<10) {
+			 spermatozoa.push({
+			    vx: Math.random() * 2 - 1,
+			    vy: Math.random() * 2 - 1,
+			    path: d3.range(m).map(function() { return [x0, y0]; }),
+			    count: 0
+			  });
+			
+			n = spermatozoa.length;
+	        //m = spermatozoa.length;	
+			
+			g = svg.selectAll("g")
+			    .data(spermatozoa)
+			  .enter().append("g");
+			  
+			head = g.append("ellipse")
+		    .attr("rx", 6.5)
+		    .attr("ry", 4);
+		
+			g.append("path")
+			    .datum(function(d) { return d.path.slice(0, 3); })
+			    .attr("class", "mid");
+			
+			g.append("path")
+			    .datum(function(d) { return d.path; })
+			    .attr("class", "tail");
+			
+			z=g.append("svg:image")
+			   .attr('x', 910)
+			   .attr('y', 225)
+			   .attr('width', 250)
+			   .attr('height', 354)
+			   .attr("xlink:href","zombie.svg")
+			   .attr("class","zombie");
+		 
+			 tail = g.selectAll("path");  
+		  	console.log("adding zombie");
+		  }
+		  else
+		  	console.log("without adding zombie");
+	 }
+		
+	setInterval(createZombie, 1000);
 	
 	d3.timer(function() {
-	  z=d3.selectAll("image.zombie");
+	  z=d3.selectAll(".zombie");
 	  for (var i = -1; ++i < n;) {
 	    var spermatozoon = spermatozoa[i],
 	        path = spermatozoon.path,
@@ -125,7 +161,9 @@ path {
 	    // Bounce off the walls.
 	    if (x < 0 || x > width) spermatozoon.vx *= -1;
 	    if (y < 0 || y > height) spermatozoon.vy *= -1;
-	
+	    
+	    
+	    
 	    // Swim!
 	    for (var j = 0; ++j < m;) {
 	      var vx = x - path[j][0],
@@ -137,6 +175,7 @@ path {
 	    }
 	  }
 	  z.attr("transform", zTransform);
+	  z.style("display",zChangeColor);
 	  head.attr("transform", headTransform);
 	  head.style("display","none");
 	  tail.attr("d", tailPath);
@@ -167,6 +206,14 @@ console.log(this);
 
 function zTransform(d) {
   return "translate(" + d.path[0] + ") scale(0.1)";
+}
+
+function zChangeColor(d) {
+  if (d.x<100)
+  	return "none";
+  else 
+     return true;
+  //return "translate(" + d.path[0] + ") scale(0.1)";
 }
 
 function headTransform(d) {
