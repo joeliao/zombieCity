@@ -49,6 +49,10 @@ path {
 	  var x = Math.random() * width,
 	      y = Math.random() * height;
 	  return {
+	  	xx:0,
+	  	yy:0,
+	  	p:false,
+	  	die:false,
 	    vx: Math.random() * 2 - 1,
 	    vy: Math.random() * 2 - 1,
 	    path: d3.range(m).map(function() { return [x0, y0]; }),
@@ -101,8 +105,12 @@ path {
 	function createZombie() {
 		 var x = Math.random() * width,
 	     y = Math.random() * height;
-		 if (spermatozoa.length<10) {
+		 if (spermatozoa.length<50) {
 			 spermatozoa.push({
+			 	xx:0,
+			 	yy:0,
+			 	p:false,
+			 	die:false,
 			    vx: Math.random() * 2 - 1,
 			    vy: Math.random() * 2 - 1,
 			    path: d3.range(m).map(function() { return [x0, y0]; }),
@@ -143,7 +151,7 @@ path {
 		  	console.log("without adding zombie");
 	 }
 		
-	setInterval(createZombie, 1000);
+	setInterval(createZombie, 5000);
 	
 	d3.timer(function() {
 	  z=d3.selectAll(".zombie");
@@ -157,12 +165,11 @@ path {
 	        speed = 0.5*Math.sqrt(dx * dx + dy * dy),
 	        count = speed * 50,
 	        k1 = -5 - speed / 3;
-	
+	    spermatozoon.xx=x;
+	    spermatozoon.yy=y;
 	    // Bounce off the walls.
 	    if (x < 0 || x > width) spermatozoon.vx *= -1;
 	    if (y < 0 || y > height) spermatozoon.vy *= -1;
-	    
-	    
 	    
 	    // Swim!
 	    for (var j = 0; ++j < m;) {
@@ -175,7 +182,8 @@ path {
 	    }
 	  }
 	  z.attr("transform", zTransform);
-	  z.style("display",zChangeColor);
+	  z.style("display",zDie);
+	  z.attr("xlink:href",zChangeImage);
 	  head.attr("transform", headTransform);
 	  head.style("display","none");
 	  tail.attr("d", tailPath);
@@ -194,25 +202,43 @@ function updateWindow() {
 window.onclick=newZombie;
 
 function newZombie(d,i) {
-console.log(this);
 	var coordinates=[0,0];
 	coordinates=d3.mouse(this);
  g.append("svg:image")
 	   .attr('width', coordinates[0])
 	   .attr('height',coordinates[1])
 	   .attr("xlink:href","zombie.svg");
-
 }
 
 function zTransform(d) {
   return "translate(" + d.path[0] + ") scale(0.1)";
 }
 
-function zChangeColor(d) {
-  if (d.x<100)
+function zChangeImage(d) {
+  if (d.xx<1100 && d.xx>900 && d.yy<500 && d.yy>400) {
+  	d.p=true;
+  	return "zombie_g.svg";
+  }
+  else  {
+  	if (! d.p)
+     return "zombie.svg";
+    else
+     return "zombie_g.svg";
+  }
+  //return "translate(" + d.path[0] + ") scale(0.1)";
+}
+
+function zDie(d) {
+  if (d.xx>1100 && d.yy<300 || d.xx>1000 && d.yy<210 || d.xx>920 && d.yy<100 || d.xx>850 && d.yy<60) {
+    d.die=true;
   	return "none";
-  else 
-     return true;
+  }
+  else { 
+     if (d.die)
+     	return "none";
+     else
+        return "";
+  }
   //return "translate(" + d.path[0] + ") scale(0.1)";
 }
 
